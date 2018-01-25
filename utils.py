@@ -17,23 +17,15 @@ def get_top100_list(refresh_html=False):
     os.makedirs(path_data_dir, exist_ok=True)
 
     # 웹페이지 주소
-    url_chart_realtime_50 = 'https://www.melon.com/chart/index.htm'
-    url_chart_realtime_100 = 'https://www.melon.com/chart/index.htm#params%5Bidx%5D=51'
+    url_chart_realtime = 'https://www.melon.com/chart/index.htm'
 
-    file_path = os.path.join(path_data_dir, 'chart_realtim_50.html')
+    # refresh_html 매개변수가 True일 경우, 무조건 새로 파일을 다운받도록 함
+    file_path = os.path.join(path_data_dir, 'chart_realtime.html')
     try:
-        with open(file_path, 'xt') as f:
-            response = requests.get(url_chart_realtime_50)
+        with open(file_path, 'wt' if refresh_html else 'xt') as f:
+            response = requests.get(url_chart_realtime)
             f.write(response.text)
     except FileExistsError:
-        print(f'"{file_path}" file is already exists!')
-
-    file_path = os.path.join(path_data_dir, 'chart_realtim_100.html')
-    if not os.path.exists(file_path):
-        response = requests.get(url_chart_realtime_100)
-        with open(file_path, 'wt') as f:
-            f.write(response.text)
-    else:
         print(f'"{file_path}" file is already exists!')
 
 
