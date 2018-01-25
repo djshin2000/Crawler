@@ -41,13 +41,15 @@ def get_top100_list(refresh_html=False):
     soup = BeautifulSoup(source, 'lxml')
 
     result = []
-
     for tr in soup.find_all('tr', class_=['lst50', 'lst100']):
         rank = tr.find('span', class_='rank').text
         img_url = tr.find('a', class_='image_typeAll').find('img').get('src')
         title = tr.find('div', class_='rank01').find('a').text
         artist = tr.find('div', class_='rank02').find('a').text
         album = tr.find('div', class_='rank03').find('a').text
+        song_id = tr.find('a', {'class': 'song_info'}).get('href')
+        pattern_song_id = re.compile(r"goSongDetail\(\'(.*?)\'\)")
+        song_id = re.search(pattern_song_id, song_id).group(1)
 
         # .* -> 임의 문자의 최대 반복
         # \. -> '.' 문자
@@ -61,7 +63,7 @@ def get_top100_list(refresh_html=False):
             'title': title,
             'artist': artist,
             'album': album,
-            # 'song_id': song_id,
+            'song_id': song_id,
         })
 
     return result
