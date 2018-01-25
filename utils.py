@@ -1,9 +1,17 @@
 import os
+import re
 import requests
+from bs4 import BeautifulSoup
 
 
 def get_top100_list(refresh_html=False):
-
+    """
+    실시간 차트 1~100위의 리스트 반환
+    파일위치:
+        data/chart_realtime.html
+    :param refresh_html: True일 경우, 무조건 새 HTML파일을 사이트에서 받아와 덮어씀
+    :return:
+    """
     # util.py의 위
     path_module = os.path.abspath(__name__)
 
@@ -28,5 +36,32 @@ def get_top100_list(refresh_html=False):
     except FileExistsError:
         print(f'"{file_path}" file is already exists!')
 
+    # *.html File Open
+    source = open(file_path, 'rt').read()
+    soup = BeautifulSoup(source, 'lxml')
 
-get_top100_list()
+    result = []
+
+    for tr in soup.find_all('tr', class_=['lst50', 'lst100']):
+        rank = tr.find('span', class_='rank').text
+        img_url = tr.find('a', class_='image_typeAll').find('img').get('src')
+        title = tr.find('div', class_='rank01').find('a').text
+        artist = tr.find('div', class_='rank02').find('a').text
+        album = tr.find('div', class_='rank03').find('a').text
+
+        # .* -> 임의 문자의 최대 반복
+        # \. -> '.' 문자
+        # .*? -> '/'이 나오기전까지의 최소 반복
+        p = re.compile(r'(.*\..*?)/')
+        img_url = re.search(p, img_url).group(1)
+
+        result.append({
+            'rank': rank,
+            'img_url': img_url,
+            'title': title,
+            'artist': artist,
+            'album': album,
+            # 'song_id': song_id,
+        })
+
+    return result
