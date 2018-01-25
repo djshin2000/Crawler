@@ -1,58 +1,40 @@
-import re
+import os
 import requests
 
-__all__ = (
-    'get_tag_attribute',
-    'get_tag_content',
-    'find_tag',
-)
 
-tag_str = '''
-<div class="top_right ">
-    <ul class="clfix">
+def get_top100_list(refresh_html=False):
 
-        <li class="first_child"><a href="/commerce/pamphlet/web/sale_listMainView.htm" title="이용권구매" class="menu01 mlog" data="LOG_PRT_CODE=1&MENU_PRT_CODE=0&MENU_ID_LV1=&CLICK_AREA_PRT_CODE=B01&ACTION_AF_CLICK=V1"><span>이용권구매</span></a></li>
+    # util.py의 위
+    path_module = os.path.abspath(__name__)
 
-        <li><a href="/event/vip/index.htm" title="VIP혜택관" class="menu02 mlog" data="LOG_PRT_CODE=1&MENU_PRT_CODE=0&MENU_ID_LV1=&CLICK_AREA_PRT_CODE=V06&ACTION_AF_CLICK=V1"><span>VIP혜택관</span></a></li>
+    # 프로젝트 컨테이너 폴더 경로치
+    root_dir = os.path.dirname(path_module)
 
-        <li class="last_child"><a href="/event/index.htm" title="이벤트" class="menu03 mlog" data="LOG_PRT_CODE=1&MENU_PRT_CODE=0&MENU_ID_LV1=&CLICK_AREA_PRT_CODE=B03&ACTION_AF_CLICK=V1"><span>이벤트</span></a></li>
-    </ul>
-</div>'''
+    # data/ 폴더 경로
+    path_data_dir = os.path.join(root_dir, 'data')
 
+    # data 폴더가 없을 경우 생성
+    os.makedirs(path_data_dir, exist_ok=True)
 
-def save_file():
-    response = requests.get('https://www.melon.com/chart/index.htm')
-    with open('melon.html', 'wt') as f:
-        f.write(response.text)
-    f.close()
+    # 웹페이지 주소
+    url_chart_realtime_50 = 'https://www.melon.com/chart/index.htm'
+    url_chart_realtime_100 = 'https://www.melon.com/chart/index.htm#params%5Bidx%5D=51'
 
+    file_path = os.path.join(path_data_dir, 'chart_realtim_50.html')
+    try:
+        with open(file_path, 'xt') as f:
+            response = requests.get(url_chart_realtime_50)
+            f.write(response.text)
+    except FileExistsError:
+        print(f'"{file_path}" file is already exists!')
 
-def get_tag_attribute(attribute_name, tag_string):
-    pattern = re.compile(r'^.*?<.*?{}.*?=.*?"(?P<value>.*?)".*?>'.format(attribute_name), re.DOTALL)
-    result = re.search(pattern, tag_string).group('value')
-    if result:
-        return result
-    return ''
-# print(get_tag_attribute('class', tag_str))
-
-
-def get_tag_content(tag_string):
-    p = re.compile(r'<.*?>(?P<value>.*)</.*?>', re.DOTALL)
-    m = re.search(p, tag_str)
-    if m:
-        return get_tag_content(m.group('value'))
-    elif re.search(r'[<>]', tag_string):
-        return ''
-    return tag_string
-# print(get_tag_content(tag_str))
+    file_path = os.path.join(path_data_dir, 'chart_realtim_100.html')
+    if not os.path.exists(file_path):
+        response = requests.get(url_chart_realtime_100)
+        with open(file_path, 'wt') as f:
+            f.write(response.text)
+    else:
+        print(f'"{file_path}" file is already exists!')
 
 
-def find_tag(tag, tag_string, class_=None):
-    p = re.compile(r'.*?(<{tag}.*?{class_}.*?>.*?</{tag}>)'.format(
-        tag=tag,
-        class_=f'class=".*?{class_}.*?"' if class_ else '',
-    ), re.DOTALL)
-    m = re.search(p, tag_string)
-    if m:
-        return m.group(1)
-    return None
+get_top100_list()
