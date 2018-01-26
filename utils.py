@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 
 def create_html(web_page, create_file_name, refresh_html=False):
     # util.py의 위
-    path_module = os.path.abspath(__name__)
+    path_module = os.path.abspath(__file__)
 
     # 프로젝트 컨테이너 폴더 경로치
     root_dir = os.path.dirname(path_module)
