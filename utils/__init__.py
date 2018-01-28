@@ -9,7 +9,7 @@ def create_html(create_file_name, url, url_param=None, refresh_html=False):
     path_module = os.path.abspath(__file__)
 
     # 프로젝트 컨테이너 폴더 경로치
-    root_dir = os.path.dirname(path_module)
+    root_dir = os.path.dirname(os.path.dirname(path_module))
 
     # data/ 폴더 경로
     path_data_dir = os.path.join(root_dir, 'data')
@@ -86,82 +86,82 @@ def get_top100_list():
     return result
 
 
-def get_song_detail(song_id):
-    """
-    song_id에 해당하는 곡 정보 dict를 반환
-    위의 get_top100_list의 각 곡 정보에도 song_id가 들어가도록 추가
-    http://www.melon.com/song/detail.htm?songId=30755375
-    위 링크를 참조
-    파일명
-        song_detail_{song_id}.html
-    :param song_id: 곡 정보 dict
-    :return:
-    """
-    parmas = {'songId': song_id}
-    url = 'https://www.melon.com/song/detail.htm'
-    # response = requests.get(url, parmas)
-    create_file_name = 'song_detail_' + str(song_id) + '.html'
-    file_path = create_html(
-        create_file_name=create_file_name,
-        url=url,
-        url_param=parmas,
-    )
-
-    # *.html File Open
-    source = open(file_path, 'rt').read()
-    soup = BeautifulSoup(source, 'lxml')
-
-    song_name = soup.select_one('div.song_name > strong').next_sibling.strip() # strip()은 앞뒤공백제거
-    # song_name = re.sub(r'^([\s\n]*)', '', song_name) # 앞공백제거
-    # song_name = re.sub(r'([\s\n]*)$', '', song_name) # 뒤공백제거
-
-    artist = soup.select_one('div.section_info a.artist_name > span:nth-of-type(1)').getText()
-
-    test = soup.find()
-
-    meta_list = soup.select('div.section_info div.meta dl.list dd')
-    # dt, dd를 dictionary로 저장하여 데이터 정합성을 체크하여 저장이 되도록 수정
-    album = meta_list[0].getText()
-    release_date = meta_list[1].getText()
-    genre = meta_list[2].getText()
-    flac = meta_list[3].getText()
-
-    lyric = str(soup.select_one('div.section_lyric div.lyric'))
-    ppp = re.compile(r'^<div.*?>.*?<!.*?>(?P<value>.*?)\s</div>$', re.DOTALL)
-    lyric = re.search(ppp, lyric).group('value')
-    lyric = re.sub(r'^([\s\n]*)', '', lyric)  # 처음공백제거
-    lyric = re.sub(r'<br/>', '\n', lyric) # br태그를 줄바꿈으로 변
-
-    prdcr_list = soup.find('div', class_='section_prdcr').find('ul', class_='list_person').find_all('li')
-    lyricist = []
-    composer = []
-    arranger = []
-    for item in prdcr_list:
-        item_type = item.select_one('div.meta span').getText()
-        item_artist = item.select_one('div.artist > a').getText()
-        if item_type == '작사':
-            lyricist.append(item_artist)
-        elif item_type == '작곡':
-            composer.append(item_artist)
-        elif item_type == '편곡':
-            arranger.append(item_artist)
-        else:
-            print('type이 정의되지 않은 artist 입니다.')
-
-    result = {
-        'song_name': song_name,
-        'artist': artist,
-        'album': album,
-        'release_date': release_date,
-        'genre': genre,
-        'flac': flac,
-        'lyric': lyric,
-        'lyricist': lyricist,
-        'composer': composer,
-        'arranger': arranger,
-    }
-
-    return result
+# def get_song_detail(song_id):
+#     """
+#     song_id에 해당하는 곡 정보 dict를 반환
+#     위의 get_top100_list의 각 곡 정보에도 song_id가 들어가도록 추가
+#     http://www.melon.com/song/detail.htm?songId=30755375
+#     위 링크를 참조
+#     파일명
+#         song_detail_{song_id}.html
+#     :param song_id: 곡 정보 dict
+#     :return:
+#     """
+#     parmas = {'songId': song_id}
+#     url = 'https://www.melon.com/song/detail.htm'
+#     # response = requests.get(url, parmas)
+#     create_file_name = 'song_detail_' + str(song_id) + '.html'
+#     file_path = create_html(
+#         create_file_name=create_file_name,
+#         url=url,
+#         url_param=parmas,
+#     )
+#
+#     # *.html File Open
+#     source = open(file_path, 'rt').read()
+#     soup = BeautifulSoup(source, 'lxml')
+#
+#     song_name = soup.select_one('div.song_name > strong').next_sibling.strip() # strip()은 앞뒤공백제거
+#     # song_name = re.sub(r'^([\s\n]*)', '', song_name) # 앞공백제거
+#     # song_name = re.sub(r'([\s\n]*)$', '', song_name) # 뒤공백제거
+#
+#     artist = soup.select_one('div.section_info a.artist_name > span:nth-of-type(1)').getText()
+#
+#     test = soup.find()
+#
+#     meta_list = soup.select('div.section_info div.meta dl.list dd')
+#     # dt, dd를 dictionary로 저장하여 데이터 정합성을 체크하여 저장이 되도록 수정
+#     album = meta_list[0].getText()
+#     release_date = meta_list[1].getText()
+#     genre = meta_list[2].getText()
+#     flac = meta_list[3].getText()
+#
+#     lyrics = str(soup.select_one('div.section_lyric div.lyric'))
+#     ppp = re.compile(r'^<div.*?>.*?<!.*?>(?P<value>.*?)\s</div>$', re.DOTALL)
+#     lyrics = re.search(ppp, lyrics).group('value')
+#     lyrics = re.sub(r'^([\s\n]*)', '', lyrics)  # 처음공백제거
+#     lyrics = re.sub(r'<br/>', '\n', lyrics) # br태그를 줄바꿈으로 변
+#
+#     prdcr_list = soup.find('div', class_='section_prdcr').find('ul', class_='list_person').find_all('li')
+#     lyricist = []
+#     composer = []
+#     arranger = []
+#     for item in prdcr_list:
+#         item_type = item.select_one('div.meta span').getText()
+#         item_artist = item.select_one('div.artist > a').getText()
+#         if item_type == '작사':
+#             lyricist.append(item_artist)
+#         elif item_type == '작곡':
+#             composer.append(item_artist)
+#         elif item_type == '편곡':
+#             arranger.append(item_artist)
+#         else:
+#             print('type이 정의되지 않은 artist 입니다.')
+#
+#     result = {
+#         'song_name': song_name,
+#         'artist': artist,
+#         'album': album,
+#         'release_date': release_date,
+#         'genre': genre,
+#         'flac': flac,
+#         'lyrics': lyrics,
+#         'lyricist': lyricist,
+#         'composer': composer,
+#         'arranger': arranger,
+#     }
+#
+#     return result
 
 
 def get_song_search_list(search_word):
@@ -184,8 +184,19 @@ def get_song_search_list(search_word):
     tr_song_list = soup.find('form', id='frm_defaultList').find('tbody').find_all('tr')
     search_list = []
     for tr in tr_song_list:
+        song_id = tr.select_one('td div.wrap.pd_none.left input[type=checkbox]').get('value')
         title = tr.select_one('td.t_left > div.wrap > div.ellipsis a.fc_gray').get_text()
-        # print(title)
-        search_list.append(title)
+        artist = tr.select_one('td.t_left div#artistName span').get_text()
+        album = tr.select_one('td:nth-of-type(5) a').get_text(strip=True)
+        search_list.append({
+            'song_id': song_id,
+            'title': title,
+            'artist': artist,
+            'album': album,
+        })
 
     return search_list
+
+
+for a in get_song_search_list('연가'):
+    print(a)
